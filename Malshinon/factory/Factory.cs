@@ -15,13 +15,19 @@ namespace Malshinon.factory
             this.faker = new Faker();
         }
 
-        public People CreateNewAgent()
+        public People CreateNewAgent(string firstname,string lastname)
         {
-            string firstName = faker.Name.FirstName();
-            string LastName = faker.Name.FirstName();
+            string firstName = firstname;
+            string LastName = lastname;
             string secretCode = faker.Random.String2(8);
-            string type = faker.PickRandom(new[] { "reporter", "target", "both", "potential_agent" });
-            return new People(firstName, LastName, secretCode, type);
+            return new People(firstName, LastName, secretCode);
+        }
+        public IntelReport CreateNewReport()
+        {
+            int reporterid = 0;
+            int targetid = 0;
+            string report = "";
+            return new IntelReport(reporterid, targetid,report);
         }
     }
 }
