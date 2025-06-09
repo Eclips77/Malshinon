@@ -16,7 +16,7 @@ namespace Malshinon.entityes
         private int NumReports;
         private int NumMentions;
 
-        public People(string fname, string lname, string scode, string mtype,int nreports = 0,int nmentions =0)
+        public People(string fname, string lname, string scode, string mtype = "reporter", int nreports = 0,int nmentions =0)
         {
             this.FirstName = fname;
             this.LastName = lname;
@@ -24,7 +24,6 @@ namespace Malshinon.entityes
             this.ManType = mtype;
             this.NumReports = nreports;
             this.NumMentions = nmentions;
-
         }
         public int GetId() => this.id;
         public string GetFirstName() => this.FirstName;

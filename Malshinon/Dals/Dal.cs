@@ -56,45 +56,21 @@ namespace Malshinon.Dals
                 this._conn = null;
             }
         }
-        public bool SearchExist(string firstName)
-        {
-            string query = "SELECT 1 FROM people WHERE first_name = '@firstName' LIMIT 1";
-            try
-            {
-                OpenConnection();
-                using (var cmd = new MySqlCommand(query, this._conn))
-                {
-                    cmd.Parameters.AddWithValue("@firstName", firstName);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        return reader.HasRows;
-                    }
-                }
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine($"SQL error: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                CloseConnection();
-            }
-        }
+   
         public void setPersonToDb(People person)
         {
             string query = $"INSERT INTO people (first_name,last_name,secret_code,type)" +
-                    $"VALUES (@first_name, @last_name, @secret_code, @type)";
+                    $"VALUES (@first_name,@last_name,@secret_code,@type)";
             try
             {
                 OpenConnection();
                 using (var cmd = new MySqlCommand(query, this._conn))
-                using (var reader = cmd.ExecuteReader())
                 {
                     cmd.Parameters.AddWithValue("@first_name", person.GetFirstName());
                     cmd.Parameters.AddWithValue("@last_name", person.GetLastName());
                     cmd.Parameters.AddWithValue("@secret_code", person.GetSecretCode());
-                    cmd.Parameters.AddWithValue("@type", person.GetType());
+                    cmd.Parameters.AddWithValue("@type", person.GetManType());
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (MySqlException ex)
@@ -107,6 +83,34 @@ namespace Malshinon.Dals
             }
         }
 
+        public void UpdateStatus(string fname,string status)
+        {
+            string query = @"UPDATE people SET type = @type WHERE first_name = @fname";
+            try
+            {
+                OpenConnection();
+                using (var cmd = new MySqlCommand(query,this._conn))
+                {
+                    cmd.Parameters.AddWithValue("@fname", fname);
+                    cmd.Parameters.AddWithValue("@type", status);
+                    cmd.ExecuteNonQuery();
+                }
 
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine($"sql error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"system error: {ex.Message}");
+            }
+            finally
+            {
+                CloseConnection();
+            }
+        }
+
+        public MySqlConnection GetConn() => this._conn;
     }
 }
