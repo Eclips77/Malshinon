@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Bogus, Version=35.6.3.0, Culture=neutral, PublicKeyToken=fa1bb3f3f218129a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Bogus.35.6.3\lib\net40\Bogus.dll</HintPath>
+    </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <HintPath>..\packages\BouncyCastle.Cryptography.2.5.1\lib\net461\BouncyCastle.Cryptography.dll</HintPath>
     </Reference>
@@ -96,9 +99,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dals\Dal.cs" />
+    <Compile Include="Dals\IntelDal.cs" />
+    <Compile Include="entityes\IntelReport.cs" />
     <Compile Include="factory\Factory.cs" />
     <Compile Include="entityes\People.cs" />
-    <Compile Include="menus\MalshinManager.cs" />
+    <Compile Include="managers\ReportsManager.cs" />
+    <Compile Include="managers\MalshinManager.cs" />
+    <Compile Include="menus\MainMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -106,8 +113,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="managers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

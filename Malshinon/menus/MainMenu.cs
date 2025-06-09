@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace Malshinon.menus
 {
-    internal class MalshinManager
+    internal class MainMenu
     {
-        public void ValidPeopleExists(string Fullname)
-        {
-            string[] Names = Fullname.Split(' ');
 
-        }
     }
 }
