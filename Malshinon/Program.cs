@@ -1,8 +1,9 @@
 ﻿using Bogus;
 using Malshinon.Dals;
-using Malshinon.entityes;
+using Malshinon.managers;
 using Malshinon.factory;
 using Malshinon.menus;
+using Malshinon.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +16,14 @@ namespace Malshinon
     {
         static void Main(string[] args)
         {
-            //Factory f = new Factory();
-            ValidateDal dod = new ValidateDal();
-            //People p = f.CreateNewAgent();
-            //dal.setPersonToDb(p);
-            Console.WriteLine(dod.SearchExist("Leone"));
+         
+            MalshinManager manager = new MalshinManager();
+            MainMenu menu = new MainMenu();
+            menu.ShowMenu(manager);
+            manager.dal.UpdateStatus("Leone","both");
+          
+
+            //Console.WriteLine(dod.SearchExist("Leone"));
         }
     }
 }

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malshinon.managers;
 
 namespace Malshinon.menus
 {
     internal class MainMenu
     {
-        public void ShowMenu()
+        public void ShowMenu(MalshinManager manager)
         {
             bool running = true;
             while (running)
@@ -25,6 +26,7 @@ namespace Malshinon.menus
                     case "1":
                         break;
                     case "2":
+                        manager.dal.setPersonToDb(manager.v.newPersoncheck());
                         break;
                     case "3":
                         break;

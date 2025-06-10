@@ -108,9 +108,38 @@ namespace Malshinon.Dals
             finally
             {
                 CloseConnection();
+                Console.WriteLine("update secssesfull");
             }
         }
 
+        public void SetReportToDb(IntelReport report)
+        {
+            string query = $"INSERT INTO intelreports (reporter_id,target_id,text)" +
+                $"VALUES(@reporter_id,@target_id,@text)";
+            try
+            {
+                OpenConnection();
+                using (var cmd = new MySqlCommand(query,this._conn))
+                {
+                    cmd.Parameters.AddWithValue("@reporter_id",report.GetReporterId());
+                    cmd.Parameters.AddWithValue("@reporter_id",report.GetTargetId());
+                    cmd.Parameters.AddWithValue("@reporter_id",report.GetReportTxt());
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine($"sql error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"c# error: {ex.Message}");
+            }
+            finally
+            {
+                CloseConnection();
+            }
+        }
         public MySqlConnection GetConn() => this._conn;
     }
 }
