@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Malshinon.Dals;
-using Malshinon.factory;
 using Malshinon.menus;
 using Malshinon.Tools;
 using System;

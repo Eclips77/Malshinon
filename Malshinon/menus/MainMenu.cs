@@ -17,11 +17,11 @@ namespace Malshinon.menus
             {
                 Console.WriteLine("welcome to malshinon console!");
                 Console.WriteLine("1. Add report");
-                Console.WriteLine("2. set a new report");
-                Console.WriteLine("3. set a new report");
+                Console.WriteLine("2. Get person ");
+                Console.WriteLine("3. Get reports");
                 Console.WriteLine("4. exit");
                 string choice = Console.ReadLine();
-                string name = Console.ReadLine();
+                //string name = Console.ReadLine();
                 Console.Clear();
                 switch (choice)
                 {
@@ -29,7 +29,7 @@ namespace Malshinon.menus
                         manager.AddReport();
                         break;
                     case "2":
-                        ;
+                        
                         break;
                     case "3":
                         break;

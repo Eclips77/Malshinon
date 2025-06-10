@@ -13,7 +13,7 @@ namespace Malshinon.Dals
     {
         private readonly Dal dal = new Dal();
 
-        public bool SearchExist(string firstName)
+        public bool ExistsInDatabase(string firstName)
         {
             string query = "SELECT * FROM people WHERE first_name = @firstName";
             try
@@ -84,14 +84,14 @@ namespace Malshinon.Dals
                 dal.OpenConnection();
                 using (var cmd = new MySqlCommand(query, dal.GetConn()))
                 {
-                    cmd.Parameters.AddWithValue("@first_name", Fname);
+                    cmd.Parameters.AddWithValue("@Fname", Fname);
 
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            string status = reader.GetString("Fname");
-                            return status;
+                            string type = reader.GetString("type");
+                            return type;
                         }
                         else
                         {

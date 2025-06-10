@@ -14,7 +14,7 @@ namespace Malshinon.entityes
         private string ReportTxt;
         private DateTime ReportTime;
 
-        public IntelReport(int rid, int tid, string rtxt, DateTime timestamp = default)
+        public IntelReport(int tid, string rtxt, int rid = 0, DateTime timestamp = default)
         {
             this.ReporterId = rid;
             this.TargetId = tid;

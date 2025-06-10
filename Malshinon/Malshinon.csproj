@@ -101,7 +101,7 @@
     <Compile Include="Dals\Dal.cs" />
     <Compile Include="Dals\ValidateDal.cs" />
     <Compile Include="entityes\IntelReport.cs" />
-    <Compile Include="factory\Factory.cs" />
+    <Compile Include="factory\Generator.cs" />
     <Compile Include="entityes\People.cs" />
     <Compile Include="managers\ReportsManager.cs" />
     <Compile Include="managers\MalshinManager.cs" />

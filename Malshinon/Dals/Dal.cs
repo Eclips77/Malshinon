@@ -122,8 +122,8 @@ namespace Malshinon.Dals
                 using (var cmd = new MySqlCommand(query,this._conn))
                 {
                     cmd.Parameters.AddWithValue("@reporter_id", reporterId);
-                    cmd.Parameters.AddWithValue("@reporter_id", targetId);
-                    cmd.Parameters.AddWithValue("@reporter_id", txt);
+                    cmd.Parameters.AddWithValue("@target_id", targetId);
+                    cmd.Parameters.AddWithValue("@text", txt);
                     cmd.ExecuteNonQuery();
                 }
             }

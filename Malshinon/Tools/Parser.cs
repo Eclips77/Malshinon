@@ -3,20 +3,19 @@ using System.Text.RegularExpressions;
 
 namespace Malshinon.Tools
 {
-    public class TextParser
+    public static class TextParser
     {
-        public (string, string)? ParseNames(string text)
+        public static (string fname, string lname) ParseNames(string text)
         {
             var match = Regex.Match(text, @"\b([A-Zא-ת][a-zא-ת]+)\s+([A-Zא-ת][a-zא-ת]+)\b");
-
+            string firstName = "";
+            string lastName = "";
             if (match.Success)
             {
-                string firstName = match.Groups[1].Value;
-                string lastName = match.Groups[2].Value;
-                return (firstName, lastName);
+                firstName = match.Groups[1].Value;
+                lastName = match.Groups[2].Value;
             }
-
-            return null;
+            return (firstName, lastName);
         }
     }
 }

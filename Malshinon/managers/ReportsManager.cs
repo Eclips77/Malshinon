@@ -1,12 +1,7 @@
 ﻿using Malshinon.Dals;
-using Malshinon.entityes;
-using Malshinon.factory;
 using Malshinon.Services;
-
-//using Malshinon.Logging;
-//using Malshinon.Models;
-//using Malshinon.Services;
 using Malshinon.Tools;
+using Malshinon.Generator;
 using System;
 
 namespace Malshinon.Managers
@@ -14,15 +9,13 @@ namespace Malshinon.Managers
     public class ReportManager
     {
         private readonly Validator validator = new Validator();
-        private readonly TextParser textParser = new TextParser();
         private readonly PersonService personService = new PersonService();
-        private readonly Factory reportFactory = new Factory();
-        private readonly ValidateDal reportDal = new ValidateDal();
+        private readonly ValidateDal validateDal = new ValidateDal();
         private readonly Dal dal = new Dal();
+        private readonly GeneratorCode generator = new GeneratorCode();
 
         public ReportResult CreateReport(int reporterId, string reportText)
         {
-
             if (!IsValidReportText(reportText))
                 return ReportResult.InvalidText;
 
@@ -31,8 +24,7 @@ namespace Malshinon.Managers
                 return ReportResult.NoTargetFound;
 
             int targetId = EnsureTargetExists(names.Value.Item1, names.Value.Item2);
-            IntelReport report = BuildReport(reporterId, targetId, reportText);
-            SaveReport(report);
+            SaveReportToDb(reporterId, targetId, reportText);
 
             return ReportResult.Success;
         }
@@ -44,49 +36,78 @@ namespace Malshinon.Managers
 
         private (string, string)? ExtractTargetNames(string text)
         {
-            return textParser.ParseNames(text);
+            return TextParser.ParseNames(text);
         }
 
         private int EnsureTargetExists(string firstName, string lastName)
         {
-            if (reportDal.SearchExist(firstName))
+            if (validateDal.ExistsInDatabase(firstName))
                 return personService.GetId(firstName);
             else
-                personService.CreateTarget(firstName, lastName);
-            return 1;
+            {
+                string code = generator.CodeGenerator();
+                dal.setPersonToDb(firstName, lastName, code, "target");
+                return personService.GetId(firstName);
+            }
         }
 
-        private IntelReport BuildReport(int reporterId, int targetId, string text)
+        private void SaveReportToDb(int reporterId, int targetId, string text)
         {
-            return reportFactory.CreateNewReport(reporterId, targetId, text);
+            dal.SetReportToDb(reporterId, targetId, text);
         }
 
-        private void SaveReport(IntelReport report)
-        {
-            dal.SetReportToDb(report);
-        }
         public int idgive(string name)
         {
             return personService.GetId(name);
         }
+
         public void AddReport()
         {
-            Console.WriteLine("enter yout first name:");
+            Console.WriteLine("Enter your first name:");
             string fname = Console.ReadLine();
-            if (reportDal.SearchExist(fname))
+            Console.WriteLine("Enter your last name:");
+            string lname = Console.ReadLine();
+
+            if (validateDal.ExistsInDatabase(fname))
             {
-                if (reportDal.CheckStatus(fname) == "target")
+                if (validateDal.CheckStatus(fname) == "target")
                 {
-                    dal.UpdateStatus(fname,"both");
+                    dal.UpdateStatus(fname, "both");
                 }
             }
             else
             {
-                dal.setPersonToDb()
+                string code = generator.CodeGenerator();
+                dal.setPersonToDb(fname, lname, code, "reporter");
+            }
+
+            Console.WriteLine("Enter your report:");
+            string report = Console.ReadLine();
+            var details = TextParser.ParseNames(report);
+
+            if (details.fname.Length > 0)
+            {
+                string targetFname = details.fname;
+                string targetLname = details.lname;
+
+                if (validateDal.ExistsInDatabase(targetFname))
+                {
+                    if (validateDal.CheckStatus(targetFname) == "reporter")
+                    {
+                        dal.UpdateStatus(targetFname, "both");
+                    }
+                }
+                else
+                {
+                    string code = generator.CodeGenerator();
+                    dal.setPersonToDb(targetFname, targetLname, code, "target");
+                }
+
+                int reporterId = personService.GetId(fname);
+                int targetId = personService.GetId(targetFname);
+                SaveReportToDb(reporterId, targetId, report);
             }
         }
-
-
     }
 
     public enum ReportResult
