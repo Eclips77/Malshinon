@@ -1,4 +1,5 @@
-﻿using Malshinon.entityes;
+﻿using Bogus;
+using Malshinon.entityes;
 using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI.Common;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Malshinon.Dals
 {
-    internal class ValidateDal
+    public  class ValidateDal
     {
         private readonly Dal dal = new Dal();
 
@@ -112,5 +113,43 @@ namespace Malshinon.Dals
             }
         }
 
+
+        public People GetPersonById(int id)
+        {
+            string query = "SELECT * FROM people WHERE id = @id";
+            try
+            {
+                using (var cmd = new MySqlCommand(query,dal.OpenConnection()))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read()) return null;
+                        return new People(
+                            reader.GetString("first_name"),
+                            reader.GetString("last_name"),
+                            reader.GetString("secret_code"),
+                            reader.GetString("type"),
+                            reader.GetInt32("id"),
+                            reader.GetInt32("num_reports"),
+                            reader.GetInt32("num_mentions"));
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine($"sql error in get by id: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            
+            }
+        }
+
+
+
     }
-}   
+  

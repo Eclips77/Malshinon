@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Malshinon.Dals
 {
-    internal class Dal
+    public  class Dal
     {
         private string connStr = "server=localhost;user=root;password=;database=malshinondb";
         private MySqlConnection _conn;
@@ -34,7 +34,7 @@ namespace Malshinon.Dals
                 Console.WriteLine($"General Error: {ex.Message}");
             }
         }
-        public MySqlConnection OpenConnection()
+        public  MySqlConnection OpenConnection()
         {
             if (this._conn == null)
             {

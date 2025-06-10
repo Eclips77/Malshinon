@@ -14,7 +14,7 @@ namespace Malshinon.Services
             return validator.ExistsInDatabase(firstName);
         }
 
-        public int GetId(string firstName)
+        public int GetIdB(string firstName)
         {
             return validator.GetIdByName(firstName);
         }

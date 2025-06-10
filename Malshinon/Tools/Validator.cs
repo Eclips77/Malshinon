@@ -2,7 +2,7 @@
 
 namespace Malshinon.Tools
 {
-    internal class Validator
+    public class Validator
     {
         public bool ValidateCapitalLetter(string txt)
         {

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Malshinon.entityes
 {
-    internal class People
+    public class People
     {
-        public int id { get; private set; }
+        public int id { get; set; }
         private string FirstName;
         private string LastName;
         private string SecretCode;

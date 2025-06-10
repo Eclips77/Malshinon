@@ -1,119 +1,143 @@
 ﻿using Malshinon.Dals;
+using Malshinon.entityes;
+using Malshinon.Generator;
 using Malshinon.Services;
 using Malshinon.Tools;
-using Malshinon.Generator;
 using System;
 
 namespace Malshinon.Managers
 {
     public class ReportManager
     {
-        private readonly Validator validator = new Validator();
-        private readonly PersonService personService = new PersonService();
-        private readonly ValidateDal validateDal = new ValidateDal();
-        private readonly Dal dal = new Dal();
-        private readonly GeneratorCode generator = new GeneratorCode();
+        private readonly Validator _validator;
+        private readonly PersonService _personService;
+        public  ValidateDal _validateDal;
+        private readonly Dal _dal;
+        private readonly GeneratorCode _codeGenerator;
 
-        public ReportResult CreateReport(int reporterId, string reportText)
+        public ReportManager(
+            Validator validator,
+            PersonService personService,
+            ValidateDal validateDal,
+            Dal dal,
+            GeneratorCode codeGenerator)
         {
-            if (!IsValidReportText(reportText))
-                return ReportResult.InvalidText;
-
-            var names = ExtractTargetNames(reportText);
-            if (names == null)
-                return ReportResult.NoTargetFound;
-
-            int targetId = EnsureTargetExists(names.Value.Item1, names.Value.Item2);
-            SaveReportToDb(reporterId, targetId, reportText);
-
-            return ReportResult.Success;
+            _validator = validator;
+            _personService = personService;
+            _validateDal = validateDal;
+            _dal = dal;
+            _codeGenerator = codeGenerator;
         }
 
-        private bool IsValidReportText(string text)
-        {
-            return validator.ValidateCapitalLetter(text);
-        }
+        //public ReportResult CreateReport(int reporterId, string reportText)
+        //{
+        //    if (!_validator.ValidateCapitalLetter(reportText))
+        //        return ReportResult.InvalidText;
 
-        private (string, string)? ExtractTargetNames(string text)
+        //    var names = TextParser.ParseNames(reportText);
+        //    if (names.fname.Length == 0)
+        //        return ReportResult.NoTargetFound;
+
+        //    int targetId = EnsureTargetExists(names.fname,names.lname);
+        //    _dal.SetReportToDb(reporterId, targetId, reportText);
+        //    return ReportResult.Success;
+        //}
+
+        public void AddReportInteractive()
         {
-            return TextParser.ParseNames(text);
+            string reporterFirst = PromptName("Enter your first name:");
+            string reporterLast = PromptName("Enter your last name:");
+            int reporterId = EnsureReporterExists(reporterFirst, reporterLast);
+
+            string reportText = Prompt("Enter your report:");
+            var names = TextParser.ParseNames(reportText);
+            if (names.fname.Length == 0)
+            {
+                Console.WriteLine("No target found inside the report text.");
+                return;
+            }
+
+            int targetId = EnsureTargetExists(names.fname, names.lname);
+            _dal.SetReportToDb(reporterId, targetId, reportText);
+            Console.WriteLine("Report saved successfully.");
         }
 
         private int EnsureTargetExists(string firstName, string lastName)
         {
-            if (validateDal.ExistsInDatabase(firstName))
-                return personService.GetId(firstName);
-            else
+            if (_validateDal.ExistsInDatabase(firstName))
+                return GetIdT(firstName);
+                
+
+            string code = _codeGenerator.CodeGenerator();
+             _dal.setPersonToDb(firstName, lastName, code, "target");
+            return GetIdT(firstName);
+
+        }
+
+        private int EnsureReporterExists(string firstName, string lastName)
+        {
+            if (_validateDal.ExistsInDatabase(firstName))
             {
-                string code = generator.CodeGenerator();
-                dal.setPersonToDb(firstName, lastName, code, "target");
-                return personService.GetId(firstName);
+                if (_validateDal.CheckStatus(firstName) == "target")
+                    _dal.UpdateStatus(firstName, "both");
+                return GetIdT(firstName);
             }
+            string code = _codeGenerator.CodeGenerator();
+            _dal.setPersonToDb(firstName, lastName, code, "reporter");
+            return GetIdT(firstName);
+
         }
 
-        private void SaveReportToDb(int reporterId, int targetId, string text)
+        private static string Prompt(string message)
         {
-            dal.SetReportToDb(reporterId, targetId, text);
+            Console.WriteLine(message);
+            return Console.ReadLine()?.Trim() ?? string.Empty;
+        }
+        private static string PromptName(string message)
+        {
+            string input = Prompt(message);
+            return CapitalizeFirstLetter(input);
         }
 
-        public int idgive(string name)
+        private static string CapitalizeFirstLetter(string input)
         {
-            return personService.GetId(name);
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            input = input.ToLower(); 
+            return char.ToUpper(input[0]) + input.Substring(1);
         }
-
-        public void AddReport()
+        public void PrintPersonById()
         {
-            Console.WriteLine("Enter your first name:");
-            string fname = Console.ReadLine();
-            Console.WriteLine("Enter your last name:");
-            string lname = Console.ReadLine();
-
-            if (validateDal.ExistsInDatabase(fname))
+            Console.Write("enter person id:");
+            try
             {
-                if (validateDal.CheckStatus(fname) == "target")
+                int id = Convert.ToInt32(Console.ReadLine());
+                var person = _validateDal.GetPersonById(id);
+                if (person == null)
                 {
-                    dal.UpdateStatus(fname, "both");
-                }
-            }
-            else
-            {
-                string code = generator.CodeGenerator();
-                dal.setPersonToDb(fname, lname, code, "reporter");
-            }
-
-            Console.WriteLine("Enter your report:");
-            string report = Console.ReadLine();
-            var details = TextParser.ParseNames(report);
-
-            if (details.fname.Length > 0)
-            {
-                string targetFname = details.fname;
-                string targetLname = details.lname;
-
-                if (validateDal.ExistsInDatabase(targetFname))
-                {
-                    if (validateDal.CheckStatus(targetFname) == "reporter")
-                    {
-                        dal.UpdateStatus(targetFname, "both");
-                    }
+                    Console.WriteLine("person not found");
                 }
                 else
                 {
-                    string code = generator.CodeGenerator();
-                    dal.setPersonToDb(targetFname, targetLname, code, "target");
+                    Console.WriteLine(person);
                 }
-
-                int reporterId = personService.GetId(fname);
-                int targetId = personService.GetId(targetFname);
-                SaveReportToDb(reporterId, targetId, report);
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"c# error in print by id {ex.Message}");
+            }
+
         }
+
+        public int GetIdT(string name) => _personService.GetIdB(name);
+
     }
 
-    public enum ReportResult
-    {
-        Success,
-        InvalidText,
-        NoTargetFound
-    }
+    //public enum ReportResult
+    //{
+    //    Success,
+    //    InvalidText,
+    //    NoTargetFound
+    //}
 }

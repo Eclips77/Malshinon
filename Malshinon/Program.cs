@@ -1,4 +1,4 @@
-﻿using Bogus;
+﻿using Malshinon.Generator;
 using Malshinon.Dals;
 using Malshinon.menus;
 using Malshinon.Tools;
@@ -16,11 +16,12 @@ namespace Malshinon
         static void Main(string[] args)
         {
          
-            ReportManager manager = new ReportManager();
+            ReportManager manager = new ReportManager(new Validator(),new Services.PersonService(),new ValidateDal(),new Dal(),new GeneratorCode());
             MainMenu menu = new MainMenu();
             menu.ShowMenu(manager);
-            //manager.dal.UpdateStatus("Leone","both");
-          
+            //ValidateDal f = new ValidateDal();
+            //f.PrintById(4);
+
 
             //Console.WriteLine(dod.SearchExist("Leone"));
         }

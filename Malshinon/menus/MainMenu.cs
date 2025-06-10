@@ -21,15 +21,14 @@ namespace Malshinon.menus
                 Console.WriteLine("3. Get reports");
                 Console.WriteLine("4. exit");
                 string choice = Console.ReadLine();
-                //string name = Console.ReadLine();
                 Console.Clear();
                 switch (choice)
                 {
                     case "1":
-                        manager.AddReport();
+                        manager.AddReportInteractive();
                         break;
                     case "2":
-                        
+                        manager.PrintPersonById();
                         break;
                     case "3":
                         break;
