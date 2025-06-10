@@ -29,20 +29,6 @@ namespace Malshinon.Managers
             _codeGenerator = codeGenerator;
         }
 
-        //public ReportResult CreateReport(int reporterId, string reportText)
-        //{
-        //    if (!_validator.ValidateCapitalLetter(reportText))
-        //        return ReportResult.InvalidText;
-
-        //    var names = TextParser.ParseNames(reportText);
-        //    if (names.fname.Length == 0)
-        //        return ReportResult.NoTargetFound;
-
-        //    int targetId = EnsureTargetExists(names.fname,names.lname);
-        //    _dal.SetReportToDb(reporterId, targetId, reportText);
-        //    return ReportResult.Success;
-        //}
-
         public void AddReportInteractive()
         {
             string reporterFirst = PromptName("Enter your first name:");
@@ -61,7 +47,6 @@ namespace Malshinon.Managers
             _dal.SetReportToDb(reporterId, targetId, reportText);
             Console.WriteLine("Report saved successfully.");
         }
-
         private int EnsureTargetExists(string firstName, string lastName)
         {
             if (_validateDal.ExistsInDatabase(firstName))
@@ -73,7 +58,6 @@ namespace Malshinon.Managers
             return GetIdT(firstName);
 
         }
-
         private int EnsureReporterExists(string firstName, string lastName)
         {
             if (_validateDal.ExistsInDatabase(firstName))
@@ -87,7 +71,6 @@ namespace Malshinon.Managers
             return GetIdT(firstName);
 
         }
-
         private static string Prompt(string message)
         {
             Console.WriteLine(message);
@@ -98,7 +81,6 @@ namespace Malshinon.Managers
             string input = Prompt(message);
             return CapitalizeFirstLetter(input);
         }
-
         private static string CapitalizeFirstLetter(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -129,15 +111,7 @@ namespace Malshinon.Managers
             }
 
         }
-
         public int GetIdT(string name) => _personService.GetIdB(name);
 
     }
-
-    //public enum ReportResult
-    //{
-    //    Success,
-    //    InvalidText,
-    //    NoTargetFound
-    //}
 }

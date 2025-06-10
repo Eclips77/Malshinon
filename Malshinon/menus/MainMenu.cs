@@ -31,6 +31,7 @@ namespace Malshinon.menus
                         manager.PrintPersonById();
                         break;
                     case "3":
+
                         break;
                     case "4":
                         Console.WriteLine("good bye :)");

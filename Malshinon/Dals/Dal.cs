@@ -140,6 +140,15 @@ namespace Malshinon.Dals
                 CloseConnection();
             }
         }
+
+        public void GetAllReports()
+        {
+            string query = $"SELECT * FROM intelreports";
+            using (var cmd = new MySqlCommand(query, this._conn))
+            {
+
+            }
+        }
         public MySqlConnection GetConn() => this._conn;
     }
 }
