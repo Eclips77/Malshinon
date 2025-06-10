@@ -16,8 +16,9 @@ namespace Malshinon.entityes
         private int NumReports;
         private int NumMentions;
 
-        public People(string fname, string lname, string scode, string mtype, int nreports = 0,int nmentions =0)
+        public People( string fname,string lname, string scode, string mtype, int id = 0, int nreports = 0,int nmentions =0)
         {
+            this.id = id;
             this.FirstName = fname;
             this.LastName = lname;
             this.SecretCode = scode;

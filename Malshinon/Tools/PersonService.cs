@@ -16,20 +16,25 @@ namespace Malshinon.Services
             return validator.SearchExist(firstName);
         }
 
-        public int GetId(string firstName, string lastName)
+        public int GetId(string firstName)
         {
-            return dal.GetPersonId(firstName, lastName);
+            return validator.GetIdByName(firstName);
         }
 
-        public int CreateReporter(string firstName, string lastName)
+        public void CreateReporter(string firstName, string lastName)
         {
             People newPerson = factory.CreateNewReporter(firstName, lastName);
-            return dal.InsertPersonAndGetId(newPerson);
+             dal.setPersonToDb(newPerson);
+        }
+        public void CreateTarget(string firstName, string lastName)
+        {
+            People newPerson = factory.CreateNewTarget(firstName, lastName);
+            dal.setPersonToDb(newPerson);
         }
 
-        public People GetPersonById(int id)
-        {
-            return dal.GetPersonById(id);
-        }
+        //public People GetPersonBy(string name)
+        //{
+        //    return validator.GetPersonByName(name);
+        //}
     }
 }

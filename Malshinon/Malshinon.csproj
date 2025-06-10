@@ -108,6 +108,7 @@
     <Compile Include="menus\MainMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\Parser.cs" />
     <Compile Include="Tools\PersonService.cs" />
     <Compile Include="Tools\Validator.cs" />
   </ItemGroup>

@@ -3,30 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Malshinon.managers;
+using Bogus;
+using Malshinon.Managers;
 
 namespace Malshinon.menus
 {
     internal class MainMenu
     {
-        public void ShowMenu(MalshinManager manager)
+        public void ShowMenu(ReportManager manager)
         {
             bool running = true;
             while (running)
             {
                 Console.WriteLine("welcome to malshinon console!");
-                Console.WriteLine("1. get people");
-                Console.WriteLine("2. set a new person");
+                Console.WriteLine("1. Add report");
+                Console.WriteLine("2. set a new report");
                 Console.WriteLine("3. set a new report");
                 Console.WriteLine("4. exit");
                 string choice = Console.ReadLine();
+                string name = Console.ReadLine();
                 Console.Clear();
                 switch (choice)
                 {
                     case "1":
+                        manager.AddReport();
                         break;
                     case "2":
-                        manager.dal.setPersonToDb(manager.v.newPersoncheck());
+                        ;
                         break;
                     case "3":
                         break;

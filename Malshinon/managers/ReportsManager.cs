@@ -1,6 +1,8 @@
 ﻿using Malshinon.Dals;
 using Malshinon.entityes;
 using Malshinon.factory;
+using Malshinon.Services;
+
 //using Malshinon.Logging;
 //using Malshinon.Models;
 //using Malshinon.Services;
@@ -12,13 +14,11 @@ namespace Malshinon.Managers
     public class ReportManager
     {
         private readonly Validator validator = new Validator();
-        //private readonly TextParser textParser = new TextParser();
-        //private readonly PersonService personService = new PersonService();
+        private readonly TextParser textParser = new TextParser();
+        private readonly PersonService personService = new PersonService();
         private readonly Factory reportFactory = new Factory();
         private readonly ValidateDal reportDal = new ValidateDal();
         private readonly Dal dal = new Dal();
-        //private readonly Logger logger = new Logger();
-        //private readonly StatusChecker statusChecker = new StatusChecker();
 
         public ReportResult CreateReport(int reporterId, string reportText)
         {
@@ -33,7 +33,6 @@ namespace Malshinon.Managers
             int targetId = EnsureTargetExists(names.Value.Item1, names.Value.Item2);
             IntelReport report = BuildReport(reporterId, targetId, reportText);
             SaveReport(report);
-            //UpdateCounters(reporterId, targetId);
 
             return ReportResult.Success;
         }
@@ -51,9 +50,10 @@ namespace Malshinon.Managers
         private int EnsureTargetExists(string firstName, string lastName)
         {
             if (reportDal.SearchExist(firstName))
-                return personService.GetId(firstName, lastName);
+                return personService.GetId(firstName);
             else
-                return personService.CreateTarget(firstName, lastName);
+                personService.CreateTarget(firstName, lastName);
+            return 1;
         }
 
         private IntelReport BuildReport(int reporterId, int targetId, string text)
@@ -65,8 +65,28 @@ namespace Malshinon.Managers
         {
             dal.SetReportToDb(report);
         }
+        public int idgive(string name)
+        {
+            return personService.GetId(name);
+        }
+        public void AddReport()
+        {
+            Console.WriteLine("enter yout first name:");
+            string fname = Console.ReadLine();
+            if (reportDal.SearchExist(fname))
+            {
+                if (reportDal.CheckStatus(fname) == "target")
+                {
+                    dal.UpdateStatus(fname,"both");
+                }
+            }
+            else
+            {
+                dal.setPersonToDb()
+            }
+        }
 
-     
+
     }
 
     public enum ReportResult

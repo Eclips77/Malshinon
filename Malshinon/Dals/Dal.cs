@@ -57,7 +57,7 @@ namespace Malshinon.Dals
             }
         }
    
-        public void setPersonToDb(People person)
+        public void setPersonToDb(string fname,string lname,string scode,string type)
         {
             string query = $"INSERT INTO people (first_name,last_name,secret_code,type)" +
                     $"VALUES (@first_name,@last_name,@secret_code,@type)";
@@ -66,16 +66,16 @@ namespace Malshinon.Dals
                 OpenConnection();
                 using (var cmd = new MySqlCommand(query, this._conn))
                 {
-                    cmd.Parameters.AddWithValue("@first_name", person.GetFirstName());
-                    cmd.Parameters.AddWithValue("@last_name", person.GetLastName());
-                    cmd.Parameters.AddWithValue("@secret_code", person.GetSecretCode());
-                    cmd.Parameters.AddWithValue("@type", person.GetManType());
+                    cmd.Parameters.AddWithValue("@first_name", fname);
+                    cmd.Parameters.AddWithValue("@last_name", lname);
+                    cmd.Parameters.AddWithValue("@secret_code", scode);
+                    cmd.Parameters.AddWithValue("@type", type);
                     cmd.ExecuteNonQuery();
                 }
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error: {ex.Message}");
+                Console.WriteLine($"SQL error method set person: {ex.Message}");
             }
             finally
             {
@@ -99,7 +99,7 @@ namespace Malshinon.Dals
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"sql error: {ex.Message}");
+                Console.WriteLine($"sql error method update status: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -112,7 +112,7 @@ namespace Malshinon.Dals
             }
         }
 
-        public void SetReportToDb(IntelReport report)
+        public void SetReportToDb(int reporterId,int targetId,string txt)
         {
             string query = $"INSERT INTO intelreports (reporter_id,target_id,text)" +
                 $"VALUES(@reporter_id,@target_id,@text)";
@@ -121,15 +121,15 @@ namespace Malshinon.Dals
                 OpenConnection();
                 using (var cmd = new MySqlCommand(query,this._conn))
                 {
-                    cmd.Parameters.AddWithValue("@reporter_id",report.GetReporterId());
-                    cmd.Parameters.AddWithValue("@reporter_id",report.GetTargetId());
-                    cmd.Parameters.AddWithValue("@reporter_id",report.GetReportTxt());
+                    cmd.Parameters.AddWithValue("@reporter_id", reporterId);
+                    cmd.Parameters.AddWithValue("@reporter_id", targetId);
+                    cmd.Parameters.AddWithValue("@reporter_id", txt);
                     cmd.ExecuteNonQuery();
                 }
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"sql error: {ex.Message}");
+                Console.WriteLine($"sql error method set report: {ex.Message}");
             }
             catch (Exception ex)
             {
