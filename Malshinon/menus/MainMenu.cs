@@ -39,6 +39,9 @@ namespace Malshinon.menus
                     default:
                         break;
                 }
+                Console.WriteLine("press any key to continue...");
+                Console.ReadKey();
+                Console.Clear();
             }
         }
     }
