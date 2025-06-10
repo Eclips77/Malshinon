@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dals\Dal.cs" />
+    <Compile Include="Dals\ReportDal.cs" />
     <Compile Include="Dals\ValidateDal.cs" />
     <Compile Include="entityes\IntelReport.cs" />
     <Compile Include="factory\Generator.cs" />

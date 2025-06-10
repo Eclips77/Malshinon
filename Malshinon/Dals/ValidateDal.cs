@@ -1,11 +1,8 @@
-﻿using Bogus;
-using Malshinon.entityes;
+﻿using Malshinon.entityes;
 using MySql.Data.MySqlClient;
-using MySqlX.XDevAPI.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -115,49 +112,6 @@ namespace Malshinon.Dals
             }
         }
 
-        public double GetAvrageLenReports(string Fname)
-        {
-            int sum = 0;
-            int counter = 0;
-            double avrage = 0;
-            try
-            {
-                dal.OpenConnection();
-                string query = "SELECT i.text " +
-                    "FROM IntelReports AS i " +
-                    "JOIN people AS p " +
-                    "ON i.reporter_id = p.id " +
-                    "WHERE first_name = @Fname";
-                using (var cmd = new MySqlCommand(query, dal.GetConn()))
-                {
-                    cmd.Parameters.AddWithValue("@Fname", $"{Fname}");
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string text = reader.GetString("text");
-                            counter++;
-                            sum += text.Length;
-                        }
-                    }
-                }
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine($"Sql Exception in get avrege: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception: {ex.Message}");
-            }
-            finally
-            {
-                dal.CloseConnection();
-            }
-            if (counter > 0) avrage = sum / counter;
-            return avrage;
-        }
-
         public int GetReportsNumById(string Fname)
         {
             int reportsNum = -1;
@@ -186,7 +140,7 @@ namespace Malshinon.Dals
                 dal.CloseConnection();
             }
             return reportsNum;
-        }
+        } //
 
         public People GetPersonById(int id)
         {

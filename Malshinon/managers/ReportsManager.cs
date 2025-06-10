@@ -76,10 +76,23 @@ namespace Malshinon.Managers
             Console.WriteLine(message);
             return Console.ReadLine()?.Trim() ?? string.Empty;
         }
+       
         private static string PromptName(string message)
         {
-            string input = Prompt(message);
+            string input;
+            do
+            {
+                input = Prompt(message);
+                if (string.IsNullOrWhiteSpace(input))
+                    Console.WriteLine("name cannot be empty try again");
+            } while (string.IsNullOrWhiteSpace(input));
+
             return CapitalizeFirstLetter(input);
+        }
+
+        public void updatePersonType()
+        {
+
         }
         private static string CapitalizeFirstLetter(string input)
         {

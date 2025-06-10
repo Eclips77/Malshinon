@@ -9,10 +9,10 @@ namespace Malshinon.Services
         private readonly ValidateDal validator = new ValidateDal();
         private readonly Dal dal = new Dal();
 
-        public bool Exists(string firstName)
-        {
-            return validator.ExistsInDatabase(firstName);
-        }
+        //public bool Exists(string firstName)
+        //{
+        //    return validator.ExistsInDatabase(firstName);
+        //}
 
         public int GetIdB(string firstName)
         {
@@ -21,7 +21,7 @@ namespace Malshinon.Services
 
         //public void CreateReporter(string firstName, string lastName)
         //{
-            
+
         //     dal.setPersonToDb(firstName, lastName,);
         //}
         //public void CreateTarget(string firstName, string lastName)
