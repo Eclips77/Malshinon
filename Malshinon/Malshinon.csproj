@@ -106,7 +106,7 @@
     <Compile Include="Tools\Generator.cs" />
     <Compile Include="entityes\People.cs" />
     <Compile Include="managers\ReportsManager.cs" />
-    <Compile Include="managers\MalshinManager.cs" />
+    <Compile Include="managers\PersonManager.cs" />
     <Compile Include="menus\MainMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

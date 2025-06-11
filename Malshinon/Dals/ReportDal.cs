@@ -1,6 +1,7 @@
 ﻿using Malshinon.DataBases;
 using Malshinon.entityes;
 using MySql.Data.MySqlClient;
+using Mysqlx.Crud;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Malshinon.Dals
         public int GetReportsNumById(string Fname)
         {
             int reportsNum = -1;
-            string query = $"SELECT num_reports FROM people WHERE first_name = $Fname";
+            string query = $"SELECT num_reports FROM people WHERE first_name = @Fname";
             try
             {
                 dbConnection.OpenConnection();
@@ -42,33 +43,30 @@ namespace Malshinon.Dals
             }
             return reportsNum;
         }
-        public void SetReportToDb(int reporterId, int targetId, string txt)
+        public void SetReportToDb(IntelReport report)
         {
-            string query = $"INSERT INTO intelreports (reporter_id,target_id,text)" +
-                $"VALUES(@reporter_id,@target_id,@text)";
+            string query = "INSERT INTO intelreports(reporter_id, target_id, report_text)VALUES(@reporter_id, @target_id, @report_text)"
+            ;
             try
             {
                 dbConnection.OpenConnection();
                 using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
-                    cmd.Parameters.AddWithValue("@reporter_id", reporterId);
-                    cmd.Parameters.AddWithValue("@target_id", targetId);
-                    cmd.Parameters.AddWithValue("@text", txt);
+                    cmd.Parameters.AddWithValue("@reporter_id", report.ReporterId);
+                    cmd.Parameters.AddWithValue("@target_id", report.TargetId);
+                    cmd.Parameters.AddWithValue("@report_text", report.ReportTxt);
                     cmd.ExecuteNonQuery();
                 }
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"sql error method set report: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"c# error: {ex.Message}");
+                Console.WriteLine($"sql error in set report {ex.Message}");
             }
             finally
             {
                 dbConnection.CloseConnection();
             }
+            
         }
 
         //public void GetAllReports()

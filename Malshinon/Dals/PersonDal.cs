@@ -1,4 +1,5 @@
-﻿using Malshinon.DataBases;
+﻿using Bogus;
+using Malshinon.DataBases;
 using Malshinon.entityes;
 using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI.Common;
@@ -17,7 +18,7 @@ namespace Malshinon.Dals
     public  class PersonDal : ValidateDal
     {
         private readonly DbConnectionMalshinon dbConnection = new DbConnectionMalshinon();
-        public void setPersonToDb(string fname,string lname,string scode,string type)
+        public void InsertPersonToDb(People p)
         {
             string query = $"INSERT INTO people (first_name,last_name,secret_code,type)" +
                     $"VALUES (@first_name,@last_name,@secret_code,@type)";
@@ -26,10 +27,10 @@ namespace Malshinon.Dals
                 dbConnection.OpenConnection();
                 using (var cmd = new MySqlCommand(query,dbConnection.GetConn()))
                 {
-                    cmd.Parameters.AddWithValue("@first_name", fname);
-                    cmd.Parameters.AddWithValue("@last_name", lname);
-                    cmd.Parameters.AddWithValue("@secret_code", scode);
-                    cmd.Parameters.AddWithValue("@type", type);
+                    cmd.Parameters.AddWithValue("@first_name",p.FirstName);
+                    cmd.Parameters.AddWithValue("@last_name",p.LastName);
+                    cmd.Parameters.AddWithValue("@secret_code",p.SecretCode);
+                    cmd.Parameters.AddWithValue("@type",p.ManType);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -117,14 +118,15 @@ namespace Malshinon.Dals
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (!reader.Read()) return null;
-                        return new People(
-                            reader.GetString("first_name"),
-                            reader.GetString("last_name"),
-                            reader.GetString("secret_code"),
-                            reader.GetString("type"),
-                            reader.GetInt32("id"),
-                            reader.GetInt32("num_reports"),
-                            reader.GetInt32("num_mentions"));
+                        return new People {
+                            id = reader.GetInt32("id"),
+                            FirstName = reader.GetString("first_name"),
+                            LastName = reader.GetString("last_name"),
+                            SecretCode = reader.GetString("secret_code"),
+                            ManType = reader.GetString("type"),
+                            NumReports = reader.GetInt32("num_reports"),
+                            NumMentions = reader.GetInt32("num_mentions")
+                                                          };
                     }
                 }
             }

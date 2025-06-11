@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Bogus;
+using Malshinon.managers;
+using Malshinon.Managers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Bogus;
-using Malshinon.Managers;
 
 namespace Malshinon.menus
 {
     internal class MainMenu
     {
-        public void ShowMenu(ReportManager manager)
+        public void ShowMenu(ReportManager manager, PersonManager pmanager)
         {
             bool running = true;
             while (running)
@@ -18,7 +19,7 @@ namespace Malshinon.menus
                 Console.WriteLine("welcome to malshinon console!");
                 Console.WriteLine("1. Add report");
                 Console.WriteLine("2. Get person ");
-                Console.WriteLine("3. Get reports");
+                Console.WriteLine("3. Add person");
                 Console.WriteLine("4. exit");
                 string choice = Console.ReadLine();
                 Console.Clear();
@@ -31,7 +32,7 @@ namespace Malshinon.menus
                         manager.PrintPersonById();
                         break;
                     case "3":
-
+                        pmanager.HandleAddReporter();
                         break;
                     case "4":
                         Console.WriteLine("good bye :)");

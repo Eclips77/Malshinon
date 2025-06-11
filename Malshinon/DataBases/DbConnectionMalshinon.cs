@@ -36,7 +36,7 @@ namespace Malshinon.DataBases
             if (this._conn.State != System.Data.ConnectionState.Open)
             {
                 this._conn.Open();
-                Console.WriteLine("Connection successful.");
+                //Console.WriteLine("Connection successful.");
                 //Console.Clear();
             }
             return this._conn;
