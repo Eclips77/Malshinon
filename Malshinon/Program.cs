@@ -16,7 +16,7 @@ namespace Malshinon
         static void Main(string[] args)
         {
          
-            ReportManager manager = new ReportManager(new Validator(),new Services.PersonService(),new ValidateDal(),new Dal(),new GeneratorCode());
+            ReportManager manager = new ReportManager(new Services.PersonService(),new ReportDal(),new PersonDal(),new GeneratorCode());
             MainMenu menu = new MainMenu();
             menu.ShowMenu(manager);
             //ValidateDal f = new ValidateDal();

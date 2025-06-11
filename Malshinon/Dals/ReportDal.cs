@@ -1,4 +1,5 @@
-﻿using Malshinon.entityes;
+﻿using Malshinon.DataBases;
+using Malshinon.entityes;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace Malshinon.Dals
 {
     public class ReportDal
     {
+        private readonly DbConnectionMalshinon dbConnection = new DbConnectionMalshinon();
 
         public int GetReportsNumById(string Fname)
         {
@@ -17,8 +19,8 @@ namespace Malshinon.Dals
             string query = $"SELECT num_reports FROM people WHERE first_name = $Fname";
             try
             {
-                dal.OpenConnection();
-                using (var cmd = new MySqlCommand(query, dal.GetConn()))
+                dbConnection.OpenConnection();
+                using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
                     cmd.Parameters.AddWithValue("@Fname", $"{Fname}");
                     using (var reader = cmd.ExecuteReader())
@@ -36,7 +38,7 @@ namespace Malshinon.Dals
             }
             finally
             {
-                dal.CloseConnection();
+                dbConnection.CloseConnection();
             }
             return reportsNum;
         }
@@ -46,8 +48,8 @@ namespace Malshinon.Dals
                 $"VALUES(@reporter_id,@target_id,@text)";
             try
             {
-                OpenConnection();
-                using (var cmd = new MySqlCommand(query, this._conn))
+                dbConnection.OpenConnection();
+                using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
                     cmd.Parameters.AddWithValue("@reporter_id", reporterId);
                     cmd.Parameters.AddWithValue("@target_id", targetId);
@@ -65,8 +67,17 @@ namespace Malshinon.Dals
             }
             finally
             {
-                CloseConnection();
+                dbConnection.CloseConnection();
             }
         }
+
+        //public void GetAllReports()
+        //{
+        //    string query = $"SELECT * FROM intelreports";
+        //    using (var cmd = new MySqlCommand(query, this._conn))
+        //    {
+
+        //    }
+        //}
     }
 }
