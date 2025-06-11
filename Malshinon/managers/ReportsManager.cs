@@ -9,33 +9,30 @@ namespace Malshinon.Managers
 {
     public class ReportManager
     {
-        private readonly Validator _validator;
         private readonly PersonService _personService;
-        public  ValidateDal _validateDal;
-        private readonly Dal _dal;
+        public ReportDal _reportDal;
+        private readonly PersonDal _personDal;
         private readonly GeneratorCode _codeGenerator;
 
         public ReportManager(
-            Validator validator,
             PersonService personService,
-            ValidateDal validateDal,
-            Dal dal,
+            ReportDal reportDal,
+            PersonDal personDal,
             GeneratorCode codeGenerator)
         {
-            _validator = validator;
             _personService = personService;
-            _validateDal = validateDal;
-            _dal = dal;
+            _reportDal = reportDal;
+            _personDal = personDal;
             _codeGenerator = codeGenerator;
         }
 
         public void AddReportInteractive()
         {
-            string reporterFirst = PromptName("Enter your first name:");
-            string reporterLast = PromptName("Enter your last name:");
+            string reporterFirst = Validator.PromptName("Enter your first name:");
+            string reporterLast = Validator.PromptName("Enter your last name:");
             int reporterId = EnsureReporterExists(reporterFirst, reporterLast);
 
-            string reportText = Prompt("Enter your report:");
+            string reportText = Validator.Prompt("Enter your report:");
             var names = TextParser.ParseNames(reportText);
             if (names.fname.Length == 0)
             {
@@ -44,58 +41,46 @@ namespace Malshinon.Managers
             }
 
             int targetId = EnsureTargetExists(names.fname, names.lname);
-            _dal.SetReportToDb(reporterId, targetId, reportText);
+            _reportDal.SetReportToDb(reporterId, targetId, reportText);
             Console.WriteLine("Report saved successfully.");
         }
         private int EnsureTargetExists(string firstName, string lastName)
         {
-            if (_validateDal.ExistsInDatabase(firstName))
+            if (_personDal.ExistsInDatabase(firstName))
                 return GetIdT(firstName);
                 
 
             string code = _codeGenerator.CodeGenerator();
-             _dal.setPersonToDb(firstName, lastName, code, "target");
+            _personDal.setPersonToDb(firstName, lastName, code, "target");
             return GetIdT(firstName);
 
         }
         private int EnsureReporterExists(string firstName, string lastName)
         {
-            if (_validateDal.ExistsInDatabase(firstName))
+            if (_personDal.ExistsInDatabase(firstName))
             {
-                if (_validateDal.CheckStatus(firstName) == "target")
-                    _dal.UpdateStatus(firstName, "both");
+                if (_personDal.CheckStatus(firstName) == "target")
+                    _personDal.UpdateStatus(firstName, "both");
                 return GetIdT(firstName);
             }
             string code = _codeGenerator.CodeGenerator();
-            _dal.setPersonToDb(firstName, lastName, code, "reporter");
+            _personDal.setPersonToDb(firstName, lastName, code, "reporter");
             return GetIdT(firstName);
 
         }
-        private static string Prompt(string message)
+       
+        public void updatePersonType()
         {
-            Console.WriteLine(message);
-            return Console.ReadLine()?.Trim() ?? string.Empty;
-        }
-        private static string PromptName(string message)
-        {
-            string input = Prompt(message);
-            return CapitalizeFirstLetter(input);
-        }
-        private static string CapitalizeFirstLetter(string input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return string.Empty;
 
-            input = input.ToLower(); 
-            return char.ToUpper(input[0]) + input.Substring(1);
         }
+     
         public void PrintPersonById()
         {
             Console.Write("enter person id:");
             try
             {
                 int id = Convert.ToInt32(Console.ReadLine());
-                var person = _validateDal.GetPersonById(id);
+                var person = _personDal.GetPersonById(id);
                 if (person == null)
                 {
                     Console.WriteLine("person not found");
