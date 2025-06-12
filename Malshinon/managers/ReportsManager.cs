@@ -9,21 +9,14 @@ namespace Malshinon.Managers
 {
     public class ReportManager
     {
-        private readonly PersonService _personService;
         public ReportDal _reportDal;
         private readonly PersonDal _personDal;
-        private readonly GeneratorCode _codeGenerator;
-
         public ReportManager(
-            PersonService personService,
             ReportDal reportDal,
-            PersonDal personDal,
-            GeneratorCode codeGenerator)
+            PersonDal personDal)
         {
-            _personService = personService;
             _reportDal = reportDal;
             _personDal = personDal;
-            _codeGenerator = codeGenerator;
         }
 
         public void AddReportInteractive()
@@ -39,19 +32,22 @@ namespace Malshinon.Managers
                 Console.WriteLine("No target found inside the report text.");
                 return;
             }
+            else
+            {
+                int targetId = EnsureTargetExists(names.fname, names.lname);
+                IntelReport report = new IntelReport { ReporterId = reporterId, TargetId = targetId, ReportTxt = reportText};
+                _reportDal.SetReportToDb(report);
+                Console.WriteLine("Report saved successfully.");
+            }
 
-            int targetId = EnsureTargetExists(names.fname, names.lname);
-            _reportDal.SetReportToDb(reporterId, targetId, reportText);
-            Console.WriteLine("Report saved successfully.");
         }
         private int EnsureTargetExists(string firstName, string lastName)
         {
             if (_personDal.ExistsInDatabase(firstName))
                 return GetIdT(firstName);
-                
 
-            string code = _codeGenerator.CodeGenerator();
-            _personDal.setPersonToDb(firstName, lastName, code, "target");
+            People p = new People { FirstName = firstName,LastName= lastName,SecretCode = GeneratorCode.CodeGenerator(),ManType = "target"};
+            _personDal.InsertPersonToDb(p);
             return GetIdT(firstName);
 
         }
@@ -63,8 +59,8 @@ namespace Malshinon.Managers
                     _personDal.UpdateStatus(firstName, "both");
                 return GetIdT(firstName);
             }
-            string code = _codeGenerator.CodeGenerator();
-            _personDal.setPersonToDb(firstName, lastName, code, "reporter");
+            People p = new People { FirstName = firstName, LastName = lastName,SecretCode = GeneratorCode.CodeGenerator(), ManType = "reporter" };
+            _personDal.InsertPersonToDb(p);
             return GetIdT(firstName);
 
         }
@@ -96,7 +92,7 @@ namespace Malshinon.Managers
             }
 
         }
-        public int GetIdT(string name) => _personService.GetIdB(name);
+        public int GetIdT(string name) => PersonService.GetIdB(name);
 
     }
 }

@@ -6,26 +6,21 @@ using System.Threading.Tasks;
 
 namespace Malshinon.entityes
 {
-    internal class IntelReport
+    public class IntelReport
     {
-        private int id;
-        private int ReporterId;
-        private int TargetId;
-        private string ReportTxt;
-        private DateTime ReportTime;
-
-        public IntelReport(int tid, string rtxt, int rid = 0, DateTime timestamp = default)
+        public int id { get; set; }
+        public int ReporterId { get; set; }
+        public int TargetId { get; set; }
+        public string ReportTxt { get; set; }
+        public DateTime ReportTime { get; set; }
+        public override string ToString()
         {
-            this.ReporterId = rid;
-            this.TargetId = tid;
-            this.ReportTxt = rtxt;
-            this.ReportTime = timestamp == default ? DateTime.Now : timestamp;
+            return $"report id: {this.id}\n" +
+                $"reporter id: {this.ReporterId}\n" +
+                $" target id: {this.TargetId}\n" +
+                $"report txt: {this.ReportTxt}\n" +
+                $"time stamp:{this.ReportTime}";
         }
-
-        public int GetId() => this.id;
-        public int GetReporterId() => this.ReporterId;
-        public int GetTargetId() => this.TargetId;
-        public string GetReportTxt() => this.ReportTxt;
-        public DateTime GetReportTime() => this.ReportTime;
+   
     }
 }
