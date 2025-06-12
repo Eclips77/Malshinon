@@ -20,13 +20,13 @@ namespace Malshinon.Dals
         public int GetReportsNumById(string Fname)
         {
             int reportsNum = -1;
-            string query = $"SELECT num_reports FROM people WHERE first_name = @Fname";
+            string query = "SELECT num_reports FROM people WHERE first_name = @Fname";
             try
             {
                 dbConnection.OpenConnection();
                 using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
-                    cmd.Parameters.AddWithValue("@Fname", $"{Fname}");
+                    cmd.Parameters.AddWithValue("@Fname", Fname);
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -38,7 +38,13 @@ namespace Malshinon.Dals
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"sql error in get reports num: {ex.Message}");
+                Console.WriteLine($"[ReportDal.GetReportsNumById] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ReportDal.GetReportsNumById] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -65,10 +71,12 @@ namespace Malshinon.Dals
             catch (MySqlException ex)
             {
                 Console.WriteLine($"[ReportDal.SetReportToDb] SQL error: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[ReportDal.SetReportToDb] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -120,10 +128,12 @@ namespace Malshinon.Dals
             catch (MySqlException ex)
             {
                 Console.WriteLine($"[ReportDal.GetReportsByReporterId] SQL error: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[ReportDal.GetReportsByReporterId] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -176,10 +186,12 @@ namespace Malshinon.Dals
             catch (MySqlException ex)
             {
                 Console.WriteLine($"[ReportDal.GetReportsByTargetId] SQL error: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[ReportDal.GetReportsByTargetId] General error: {ex.Message}");
+                throw;
             }
             finally
             {

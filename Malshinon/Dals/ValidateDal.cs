@@ -23,7 +23,6 @@ namespace Malshinon.Dals
                 using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
                     cmd.Parameters.AddWithValue("@firstName", firstName);
-
                     using (var reader = cmd.ExecuteReader())
                     {
                         return reader.HasRows;
@@ -32,8 +31,13 @@ namespace Malshinon.Dals
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error in meyhod search exsist: {ex.Message}");
-                return false;
+                Console.WriteLine($"[ValidateDal.ExistsInDatabase] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ValidateDal.ExistsInDatabase] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -42,20 +46,26 @@ namespace Malshinon.Dals
         }
         public string GetPersonType(string Fname)
         {
-            string query = $"SELECT type FROM people WHERE first_name = @Fname";
+            string query = "SELECT type FROM people WHERE first_name = @Fname";
             try
             {
                 dbConnection.OpenConnection();
                 using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
                     cmd.Parameters.AddWithValue("@Fname", Fname);
-
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            string type = reader.GetString("type");
-                            return type;
+                            try
+                            {
+                                return reader.GetString("type");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"[ValidateDal.GetPersonType] Error reading row: {ex.Message}");
+                                throw;
+                            }
                         }
                         else
                         {
@@ -63,12 +73,16 @@ namespace Malshinon.Dals
                         }
                     }
                 }
-
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"sql error in check status: {ex.Message}");
-                return "";
+                Console.WriteLine($"[ValidateDal.GetPersonType] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ValidateDal.GetPersonType] General error: {ex.Message}");
+                throw;
             }
             finally
             {
