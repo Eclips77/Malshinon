@@ -101,6 +101,7 @@
     <Compile Include="Dals\PersonDal.cs" />
     <Compile Include="Dals\ReportDal.cs" />
     <Compile Include="Dals\ValidateDal.cs" />
+    <Compile Include="Dals\AnalysisDal.cs" />
     <Compile Include="DataBases\DbConnectionMalshinon.cs" />
     <Compile Include="entityes\IntelReport.cs" />
     <Compile Include="Tools\Generator.cs" />
@@ -113,6 +114,11 @@
     <Compile Include="Tools\Parser.cs" />
     <Compile Include="Tools\PersonService.cs" />
     <Compile Include="Tools\Validator.cs" />
+    <Compile Include="entityes\Alert.cs" />
+    <Compile Include="entityes\ReporterStats.cs" />
+    <Compile Include="entityes\TargetStats.cs" />
+    <Compile Include="menus\AnalysisMenu.cs" />
+    <Compile Include="Tools\CryptoHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
