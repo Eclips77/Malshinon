@@ -26,42 +26,51 @@ namespace Malshinon.Managers
             int reporterId = EnsureReporterExists(reporterFirst, reporterLast);
 
             string reportText = Validator.Prompt("Enter your report:");
-            var names = TextParser.ParseNames(reportText);
-            if (names.fname.Length == 0)
+            var targetName = TextParser.ParseNames(reportText);
+            if (targetName.fname.Length == 0 && targetName.lname.Length == 0)
             {
                 Console.WriteLine("No target found inside the report text.");
                 return;
             }
             else
             {
-                int targetId = EnsureTargetExists(names.fname, names.lname);
+                int targetId = EnsureTargetExists(targetName.fname, targetName.lname);
                 IntelReport report = new IntelReport { ReporterId = reporterId, TargetId = targetId, ReportTxt = reportText};
                 _reportDal.SetReportToDb(report);
                 Console.WriteLine("Report saved successfully.");
             }
-
         }
         private int EnsureTargetExists(string firstName, string lastName)
         {
             if (_personDal.ExistsInDatabase(firstName))
-                return GetIdT(firstName);
-
-            People p = new People { FirstName = firstName,LastName= lastName,SecretCode = GeneratorCode.CodeGenerator(),ManType = "target"};
-            _personDal.InsertPersonToDb(p);
-            return GetIdT(firstName);
-
+            {
+                if (_personDal.GetPersonType(firstName) == "reporter")
+                {
+                    _personDal.SetPersonType(firstName, "both");
+                }
+            }
+            else
+            {
+                People p = new People { FirstName = firstName, LastName = lastName, SecretCode = GeneratorCode.CodeGenerator(), ManType = "target" };
+                _personDal.InsertPersonToDb(p);
+            }
+            return GetPersonIdByFirstName(firstName);
         }
         private int EnsureReporterExists(string firstName, string lastName)
         {
             if (_personDal.ExistsInDatabase(firstName))
             {
-                if (_personDal.CheckStatus(firstName) == "target")
-                    _personDal.UpdateStatus(firstName, "both");
-                return GetIdT(firstName);
+                if (_personDal.GetPersonType(firstName) == "target")
+                {
+                    _personDal.SetPersonType(firstName, "both");
+                }
             }
-            People p = new People { FirstName = firstName, LastName = lastName,SecretCode = GeneratorCode.CodeGenerator(), ManType = "reporter" };
-            _personDal.InsertPersonToDb(p);
-            return GetIdT(firstName);
+            else
+            {
+                People newPerson = new People { FirstName = firstName, LastName = lastName, SecretCode = GeneratorCode.CodeGenerator(), ManType = "reporter" };
+                _personDal.InsertPersonToDb(newPerson);
+            }
+            return GetPersonIdByFirstName(firstName);
 
         }
        
@@ -92,7 +101,7 @@ namespace Malshinon.Managers
             }
 
         }
-        public int GetIdT(string name) => PersonService.GetIdB(name);
+        public int GetPersonIdByFirstName(string name) => PersonService.GetIdB(name);
 
     }
 }

@@ -43,7 +43,7 @@ namespace Malshinon.Dals
                 dbConnection.CloseConnection();
             }
         }
-        public void UpdateStatus(string fname,string status)
+        public void SetPersonType(string fname,string status)
         {
             string query = @"UPDATE people SET type = @type WHERE first_name = @fname";
             try
