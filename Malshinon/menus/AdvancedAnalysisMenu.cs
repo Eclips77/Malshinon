@@ -27,13 +27,18 @@ namespace Malshinon.menus
                 Console.WriteLine("7. Target statistics");
                 Console.WriteLine("8. Promotion & flag logs");
                 Console.WriteLine("0. Return to Main Menu");
-                Console.Write("\nEnter your choice: ");
 
-                if (!int.TryParse(Console.ReadLine(), out int choice))
+                int choice;
+                while (true)
                 {
-                    Console.WriteLine("Invalid input. Press any key to continue...");
-                    Console.ReadKey();
-                    continue;
+                    Console.Write("\nEnter your choice: ");
+                    string input = Console.ReadLine();
+                    if (!int.TryParse(input, out choice) || choice < 0 || choice > 8)
+                    {
+                        Console.WriteLine("Invalid choice. Please enter a number between 0 and 8.");
+                        continue;
+                    }
+                    break;
                 }
 
                 switch (choice)
@@ -64,36 +69,43 @@ namespace Malshinon.menus
                         break;
                     case 0:
                         return;
-                    default:
-                        Console.WriteLine("Invalid choice. Press any key to continue...");
-                        Console.ReadKey();
-                        break;
                 }
             }
         }
 
         private void ShowPotentialAgents()
         {
-            Console.Clear();
-            Console.WriteLine("=== Potential Agents ===");
-            var reporterStats = analysisDal.GetReporterStats();
-            var potentialAgents = reporterStats.Where(s => s.ReportCount >= 10 && s.AverageLength >= 100);
+            try
+            {
+                Console.Clear();
+                Console.WriteLine("=== Potential Agents ===");
+                
+                // First promote any reporters that meet the criteria
+                analysisDal.PromotePotentialAgents();
+                
+                var reporterStats = analysisDal.GetReporterStats();
+                var potentialAgents = reporterStats.Where(s => s.ReportCount >= 10 && s.AverageLength >= 100);
 
-            if (!potentialAgents.Any())
-            {
-                Console.WriteLine("No potential agents found.");
-            }
-            else
-            {
-                Console.WriteLine("\n{0,-20} {1,-10} {2,-15}", "Name", "Reports", "Avg Length");
-                Console.WriteLine(new string('-', 45));
-                foreach (var agent in potentialAgents.OrderByDescending(a => a.ReportCount))
+                if (!potentialAgents.Any())
                 {
-                    Console.WriteLine("{0,-20} {1,-10} {2,-15:F1}",
-                        agent.Name,
-                        agent.ReportCount,
-                        agent.AverageLength);
+                    Console.WriteLine("No potential agents found.");
                 }
+                else
+                {
+                    Console.WriteLine("\n{0,-20} {1,-10} {2,-15}", "Name", "Reports", "Avg Length");
+                    Console.WriteLine(new string('-', 45));
+                    foreach (var agent in potentialAgents.OrderByDescending(a => a.ReportCount))
+                    {
+                        Console.WriteLine("{0,-20} {1,-10} {2,-15:F1}",
+                            agent.Name,
+                            agent.ReportCount,
+                            agent.AverageLength);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AdvancedAnalysisMenu.ShowPotentialAgents] Error: {ex.Message}");
             }
             Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
@@ -153,81 +165,89 @@ namespace Malshinon.menus
 
         private void SearchReportsByPerson()
         {
-            Console.Clear();
-            Console.WriteLine("=== Search Reports by Person ===");
-            Console.Write("Enter person name (first or last): ");
-            string name = Console.ReadLine();
-            var person = personDal.GetPersonByName(name);
-            if (person == null)
+            while (true)
             {
-                Console.WriteLine("Person not found.");
+                Console.Clear();
+                Console.WriteLine("=== Search Reports by Person ===");
+                Console.Write("Enter person name (first or last): ");
+                string name = Console.ReadLine();
+                var person = personDal.GetPersonByName(name);
+                if (person == null)
+                {
+                    Console.WriteLine("Person not found. Please enter a valid name.");
+                    Console.WriteLine("Press any key to try again...");
+                    Console.ReadKey();
+                    continue;
+                }
+                Console.WriteLine($"\nReports as Reporter for {person.FirstName} {person.LastName}:");
+                var reportsAsReporter = reportDal.GetReportsByReporterId(person.id);
+                if (reportsAsReporter.Any())
+                {
+                    foreach (var report in reportsAsReporter)
+                    {
+                        Console.WriteLine($"[Target: {report.TargetName}] {report.Timestamp:yyyy-MM-dd HH:mm} - {report.ReportTxt}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No reports as reporter.");
+                }
+                Console.WriteLine($"\nReports as Target for {person.FirstName} {person.LastName}:");
+                var reportsAsTarget = reportDal.GetReportsByTargetId(person.id);
+                if (reportsAsTarget.Any())
+                {
+                    foreach (var report in reportsAsTarget)
+                    {
+                        Console.WriteLine($"[Reporter: {report.ReporterName}] {report.Timestamp:yyyy-MM-dd HH:mm} - {report.ReportTxt}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No reports as target.");
+                }
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
-                return;
+                break;
             }
-            Console.WriteLine($"\nReports as Reporter for {person.FirstName} {person.LastName}:");
-            var reportsAsReporter = reportDal.GetReportsByReporterId(person.id);
-            if (reportsAsReporter.Any())
-            {
-                foreach (var report in reportsAsReporter)
-                {
-                    Console.WriteLine($"[Target: {report.TargetName}] {report.Timestamp:yyyy-MM-dd HH:mm} - {report.ReportTxt}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No reports as reporter.");
-            }
-            Console.WriteLine($"\nReports as Target for {person.FirstName} {person.LastName}:");
-            var reportsAsTarget = reportDal.GetReportsByTargetId(person.id);
-            if (reportsAsTarget.Any())
-            {
-                foreach (var report in reportsAsTarget)
-                {
-                    Console.WriteLine($"[Reporter: {report.ReporterName}] {report.Timestamp:yyyy-MM-dd HH:mm} - {report.ReportTxt}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No reports as target.");
-            }
-            Console.WriteLine("\nPress any key to continue...");
-            Console.ReadKey();
         }
 
         private void ShowAlertsForPerson()
         {
-            Console.Clear();
-            Console.WriteLine("=== Alerts for Person ===");
-            Console.Write("Enter person name (first or last): ");
-            string name = Console.ReadLine();
-            var person = personDal.GetPersonByName(name);
-            if (person == null)
+            while (true)
             {
-                Console.WriteLine("Person not found.");
+                Console.Clear();
+                Console.WriteLine("=== Alerts for Person ===");
+                Console.Write("Enter person name (first or last): ");
+                string name = Console.ReadLine();
+                var person = personDal.GetPersonByName(name);
+                if (person == null)
+                {
+                    Console.WriteLine("Person not found. Please enter a valid name.");
+                    Console.WriteLine("Press any key to try again...");
+                    Console.ReadKey();
+                    continue;
+                }
+                var alerts = analysisDal.GetActiveAlerts().Where(a => a.TargetId == person.id).ToList();
+                if (!alerts.Any())
+                {
+                    Console.WriteLine("No alerts for this person.");
+                }
+                else
+                {
+                    Console.WriteLine("\n{0,-20} {1,-20} {2,-30}", "Target", "Time Window", "Reason");
+                    Console.WriteLine(new string('-', 70));
+                    foreach (var alert in alerts.OrderByDescending(a => a.Timestamp))
+                    {
+                        Console.WriteLine("{0,-20} {1,-20} {2,-30}",
+                            alert.TargetName,
+                            $"{alert.StartTime:yyyy-MM-dd HH:mm} - {alert.EndTime:HH:mm}",
+                            alert.Reason);
+                    }
+                }
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
-                return;
+                break;
             }
-            var alerts = analysisDal.GetActiveAlerts().Where(a => a.TargetId == person.id).ToList();
-            if (!alerts.Any())
-            {
-                Console.WriteLine("No alerts for this person.");
-            }
-            else
-            {
-                Console.WriteLine("\n{0,-20} {1,-20} {2,-30}", "Target", "Time Window", "Reason");
-                Console.WriteLine(new string('-', 70));
-                foreach (var alert in alerts.OrderByDescending(a => a.Timestamp))
-                {
-                    Console.WriteLine("{0,-20} {1,-20} {2,-30}",
-                        alert.TargetName,
-                        $"{alert.StartTime:yyyy-MM-dd HH:mm} - {alert.EndTime:HH:mm}",
-                        alert.Reason);
-                }
-            }
-            Console.WriteLine("\nPress any key to continue...");
-            Console.ReadKey();
         }
 
         private void ShowReporterStats()

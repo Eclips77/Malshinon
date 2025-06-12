@@ -30,7 +30,13 @@ namespace Malshinon.Dals
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error in create alert: {ex.Message}");
+                Console.WriteLine($"[AnalysisDal.CreateAlert] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AnalysisDal.CreateAlert] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -54,23 +60,36 @@ namespace Malshinon.Dals
                     {
                         while (reader.Read())
                         {
-                            alerts.Add(new Alert
+                            try
                             {
-                                Id = reader.GetInt32("id"),
-                                TargetId = reader.GetInt32("target_id"),
-                                TargetName = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
-                                StartTime = reader.GetDateTime("start_time"),
-                                EndTime = reader.GetDateTime("end_time"),
-                                Reason = reader.GetString("reason"),
-                                Timestamp = reader.GetDateTime("timestamp")
-                            });
+                                alerts.Add(new Alert
+                                {
+                                    Id = reader.GetInt32("id"),
+                                    TargetId = reader.GetInt32("target_id"),
+                                    TargetName = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
+                                    StartTime = reader.GetDateTime("start_time"),
+                                    EndTime = reader.GetDateTime("end_time"),
+                                    Reason = reader.GetString("reason"),
+                                    Timestamp = reader.GetDateTime("timestamp")
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"[AnalysisDal.GetActiveAlerts] Error reading row: {ex.Message}");
+                            }
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error in get active alerts: {ex.Message}");
+                Console.WriteLine($"[AnalysisDal.GetActiveAlerts] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AnalysisDal.GetActiveAlerts] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -110,7 +129,13 @@ namespace Malshinon.Dals
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error in check burst alerts: {ex.Message}");
+                Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] General error: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -125,7 +150,7 @@ namespace Malshinon.Dals
                            AVG(LENGTH(r.report_text)) as avg_length
                            FROM people p
                            LEFT JOIN intelreports r ON p.id = r.reporter_id
-                           WHERE p.type IN ('reporter', 'both')
+                           WHERE p.type IN ('reporter', 'both', 'potential_agent')
                            GROUP BY p.id, p.first_name, p.last_name, p.num_reports";
             try
             {
@@ -136,26 +161,78 @@ namespace Malshinon.Dals
                     {
                         while (reader.Read())
                         {
-                            stats.Add(new ReporterStats
+                            try
                             {
-                                Id = reader.GetInt32("id"),
-                                Name = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
-                                ReportCount = reader.GetInt32("num_reports"),
-                                AverageLength = reader.IsDBNull(reader.GetOrdinal("avg_length")) ? 0 : reader.GetDouble("avg_length")
-                            });
+                                stats.Add(new ReporterStats
+                                {
+                                    Id = reader.GetInt32("id"),
+                                    Name = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
+                                    ReportCount = reader.GetInt32("num_reports"),
+                                    AverageLength = reader.IsDBNull(reader.GetOrdinal("avg_length")) ? 0 : reader.GetDouble("avg_length")
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"AnalysisDal.GetReporterStats Error reading row: {ex.Message}");
+                            }
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error in get reporter stats: {ex.Message}");
+                Console.WriteLine($"[AnalysisDal.GetReporterStats] SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AnalysisDal.GetReporterStats] General error: {ex.Message}");
+                throw;
             }
             finally
             {
                 dbConnection.CloseConnection();
             }
             return stats;
+        }
+
+        public void PromotePotentialAgents()
+        {
+            try
+            {
+                var stats = GetReporterStats();
+                foreach (var stat in stats)
+                {
+                    if (stat.ReportCount >= 10 && stat.AverageLength >= 100)
+                    {
+                        try
+                        {
+                            dbConnection.OpenConnection();
+                            string updateQuery = @"UPDATE people 
+                                                SET type = 'potential_agent' 
+                                                WHERE id = @id AND type != 'potential_agent'";
+                            using (var cmd = new MySqlCommand(updateQuery, dbConnection.GetConn()))
+                            {
+                                cmd.Parameters.AddWithValue("@id", stat.Id);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"AnalysisDal.PromotePotentialAgents Error promoting agent {stat.Name}: {ex.Message}");
+                        }
+                        finally
+                        {
+                            dbConnection.CloseConnection();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"AnalysisDal.PromotePotentialAgents General error: {ex.Message}");
+                throw;
+            }
         }
 
         public List<TargetStats> GetTargetStats()
@@ -174,20 +251,33 @@ namespace Malshinon.Dals
                     {
                         while (reader.Read())
                         {
-                            stats.Add(new TargetStats
+                            try
                             {
-                                Id = reader.GetInt32("id"),
-                                Name = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
-                                MentionCount = reader.GetInt32("num_mentions"),
-                                IsDangerous = reader.GetInt32("is_dangerous") == 1
-                            });
+                                stats.Add(new TargetStats
+                                {
+                                    Id = reader.GetInt32("id"),
+                                    Name = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
+                                    MentionCount = reader.GetInt32("num_mentions"),
+                                    IsDangerous = reader.GetInt32("is_dangerous") == 1
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"AnalysisDal.GetTargetStats Error reading row: {ex.Message}");
+                            }
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"SQL error in get target stats: {ex.Message}");
+                Console.WriteLine($"AnalysisDal.GetTargetStats SQL error: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"AnalysisDal.GetTargetStats General error: {ex.Message}");
+                throw;
             }
             finally
             {
