@@ -59,7 +59,7 @@ namespace Malshinon.Managers
                     _personDal.UpdateStatus(firstName, "both");
                 return GetIdT(firstName);
             }
-            People p = new People { FirstName = firstName, LastName = lastName, ManType = "reporter" };
+            People p = new People { FirstName = firstName, LastName = lastName,SecretCode = GeneratorCode.CodeGenerator(), ManType = "reporter" };
             _personDal.InsertPersonToDb(p);
             return GetIdT(firstName);
 

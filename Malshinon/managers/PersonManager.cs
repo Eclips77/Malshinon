@@ -4,13 +4,9 @@ using Malshinon.Services;
 using Malshinon.Tools;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Malshinon.managers
 {
-    internal class PersonManager
+    public class PersonManager
     {
         private readonly PersonDal _personDal;
   
@@ -22,7 +18,7 @@ namespace Malshinon.managers
 
         public void HandleAddReporter()
         {
-            Console.Write("enter your id to sign in:");
+            //Console.Write("enter your id to sign in:");
 
             PersonService.AddNewReporterToDb();
         }

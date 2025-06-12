@@ -1,17 +1,14 @@
 ﻿using Bogus;
+using Malshinon.Dals;
 using Malshinon.managers;
 using Malshinon.Managers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malshinon.menus
 {
-    internal class MainMenu
+    public static  class MainMenu
     {
-        public void ShowMenu(ReportManager manager, PersonManager pmanager)
+        public static void ShowMenu(ReportManager manager, PersonManager pmanager)
         {
             bool running = true;
             while (running)

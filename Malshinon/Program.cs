@@ -17,14 +17,9 @@ namespace Malshinon
     {
         static void Main(string[] args)
         {
-
             ReportManager manager = new ReportManager(new ReportDal(), new PersonDal());
             PersonManager pmanager = new PersonManager(new PersonDal());
-            MainMenu menu = new MainMenu();
-            menu.ShowMenu(manager, pmanager);
-            //f.PrintById(4);
-
-
+            MainMenu.ShowMenu(manager, pmanager);
         }
     }
 }
