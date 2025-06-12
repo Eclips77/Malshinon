@@ -142,7 +142,76 @@ namespace Malshinon.Dals
 
         }
         
+        public People GetPersonByName(string name)
+        {
+            string query = @"SELECT * FROM people WHERE first_name = @name OR last_name = @name OR CONCAT(first_name, ' ', last_name) = @name";
+            try
+            {
+                dbConnection.OpenConnection();
+                using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
+                {
+                    cmd.Parameters.AddWithValue("@name", name);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read()) return null;
+                        return new People
+                        {
+                            id = reader.GetInt32("id"),
+                            FirstName = reader.GetString("first_name"),
+                            LastName = reader.GetString("last_name"),
+                            SecretCode = reader.GetString("secret_code"),
+                            ManType = reader.GetString("type"),
+                            NumReports = reader.GetInt32("num_reports"),
+                            NumMentions = reader.GetInt32("num_mentions")
+                        };
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine($"SQL error in get person by name: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                dbConnection.CloseConnection();
+            }
+        }
 
-
+        public People GetPersonBySecretCode(string secretCode)
+        {
+            string query = "SELECT * FROM people WHERE secret_code = @secret_code";
+            try
+            {
+                dbConnection.OpenConnection();
+                using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
+                {
+                    cmd.Parameters.AddWithValue("@secret_code", secretCode);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read()) return null;
+                        return new People
+                        {
+                            id = reader.GetInt32("id"),
+                            FirstName = reader.GetString("first_name"),
+                            LastName = reader.GetString("last_name"),
+                            SecretCode = reader.GetString("secret_code"),
+                            ManType = reader.GetString("type"),
+                            NumReports = reader.GetInt32("num_reports"),
+                            NumMentions = reader.GetInt32("num_mentions")
+                        };
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine($"SQL error in get person by secret code: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                dbConnection.CloseConnection();
+            }
+        }
     }
 }

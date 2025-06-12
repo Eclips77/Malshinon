@@ -17,7 +17,8 @@ namespace Malshinon.menus
                 Console.WriteLine("1. Add report");
                 Console.WriteLine("2. Get person ");
                 Console.WriteLine("3. Add person");
-                Console.WriteLine("4. exit");
+                Console.WriteLine("4. Advanced Intelligence Analysis");
+                Console.WriteLine("5. exit");
                 string choice = Console.ReadLine();
                 Console.Clear();
                 switch (choice)
@@ -32,6 +33,9 @@ namespace Malshinon.menus
                         pmanager.HandleAddReporter();
                         break;
                     case "4":
+                        new AnalysisMenu().ShowMenu();
+                        break;
+                    case "5":
                         Console.WriteLine("good bye :)");
                         running = false;
                         break;
