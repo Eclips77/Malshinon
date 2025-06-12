@@ -40,7 +40,7 @@ namespace Malshinon.Dals
                 dbConnection.CloseConnection();
             }
         }
-        public string CheckStatus(string Fname)
+        public string GetPersonType(string Fname)
         {
             string query = $"SELECT type FROM people WHERE first_name = @Fname";
             try
