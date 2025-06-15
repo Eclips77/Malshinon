@@ -11,21 +11,21 @@ namespace Malshinon.Dals
     {
         private readonly DbConnectionMalshinon dbConnection = new DbConnectionMalshinon();
 
-        public void CreateAlert(int targetId, DateTime startTime, DateTime endTime, string reason)
+        public void CreateAlert(int reporterId, int targetId, string reason)
         {
-            string query = @"INSERT INTO alerts (target_id, start_time, end_time, reason, timestamp) 
-                           VALUES (@target_id, @start_time, @end_time, @reason, @timestamp)";
+            string query = @"INSERT INTO alerts (reporter_id, target_id, reason, timestamp) 
+                           VALUES (@reporter_id, @target_id, @reason, @timestamp)";
             try
             {
                 dbConnection.OpenConnection();
                 using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
                 {
+                    cmd.Parameters.AddWithValue("@reporter_id", reporterId);
                     cmd.Parameters.AddWithValue("@target_id", targetId);
-                    cmd.Parameters.AddWithValue("@start_time", startTime);
-                    cmd.Parameters.AddWithValue("@end_time", endTime);
                     cmd.Parameters.AddWithValue("@reason", reason);
                     cmd.Parameters.AddWithValue("@timestamp", DateTime.Now);
-                    cmd.ExecuteNonQuery();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    Console.WriteLine($"[AnalysisDal.CreateAlert] Alert created for target {targetId}, reason: {reason}. Rows affected: {rowsAffected}");
                 }
             }
             catch (MySqlException ex)
@@ -47,10 +47,7 @@ namespace Malshinon.Dals
         public List<Alert> GetActiveAlerts()
         {
             var alerts = new List<Alert>();
-            string query = @"SELECT a.*, p.first_name, p.last_name 
-                           FROM alerts a 
-                           JOIN people p ON a.target_id = p.id 
-                           WHERE a.timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
+            string query = @"SELECT * FROM alerts WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
             try
             {
                 dbConnection.OpenConnection();
@@ -65,10 +62,8 @@ namespace Malshinon.Dals
                                 alerts.Add(new Alert
                                 {
                                     Id = reader.GetInt32("id"),
+                                    ReporterId = reader.GetInt32("reporter_id"),
                                     TargetId = reader.GetInt32("target_id"),
-                                    TargetName = $"{reader.GetString("first_name")} {reader.GetString("last_name")}",
-                                    StartTime = reader.GetDateTime("start_time"),
-                                    EndTime = reader.GetDateTime("end_time"),
                                     Reason = reader.GetString("reason"),
                                     Timestamp = reader.GetDateTime("timestamp")
                                 });
@@ -98,31 +93,86 @@ namespace Malshinon.Dals
             return alerts;
         }
 
-        public void CheckForBurstAlerts(int targetId)
+        public void CheckForBurstAlerts(int reporterId, int targetId)
         {
-            string query = @"SELECT COUNT(*) as report_count, 
-                           MIN(timestamp) as start_time, 
-                           MAX(timestamp) as end_time
-                           FROM intelreports 
-                           WHERE target_id = @target_id 
-                           AND timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
+            Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Checking for burst alerts for target ID: {targetId}, triggered by reporter ID: {reporterId}");
+            
             try
             {
                 dbConnection.OpenConnection();
-                using (var cmd = new MySqlCommand(query, dbConnection.GetConn()))
+                using (var conn = dbConnection.GetConn())
                 {
-                    cmd.Parameters.AddWithValue("@target_id", targetId);
-                    using (var reader = cmd.ExecuteReader())
+                    // First, get the target name
+                    string targetName;
+                    using (var cmd = new MySqlCommand("SELECT first_name, last_name FROM people WHERE id = @target_id", conn))
                     {
-                        if (reader.Read())
+                        cmd.Parameters.AddWithValue("@target_id", targetId);
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            int reportCount = reader.GetInt32("report_count");
-                            if (reportCount >= 3)
+                            if (reader.Read())
                             {
-                                DateTime startTime = reader.GetDateTime("start_time");
-                                DateTime endTime = reader.GetDateTime("end_time");
-                                CreateAlert(targetId, startTime, endTime, "Rapid reports detected");
+                                targetName = $"{reader.GetString("first_name")} {reader.GetString("last_name")}";
                             }
+                            else
+                            {
+                                Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Target ID {targetId} not found.");
+                                return;
+                            }
+                        }
+                    }
+
+                    // Then check for burst using ExecuteScalar
+                    string query = @"SELECT COUNT(*) as report_count
+                                   FROM intelreports 
+                                   WHERE target_id = @target_id 
+                                   AND timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
+                    
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@target_id", targetId);
+                        int reportCount = Convert.ToInt32(cmd.ExecuteScalar());
+                        Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Found {reportCount} reports for target {targetId} in last 15 minutes.");
+                        
+                        if (reportCount >= 3)
+                        {
+                            string reason = $"Target: {targetName}, Reports in last 15 min: {reportCount}";
+                            Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Potential burst detected. Reason: {reason}");
+
+                            // Check if alert already exists
+                            bool alertExists = false;
+                            using (var checkCmd = new MySqlCommand(
+                                @"SELECT COUNT(*) FROM alerts 
+                                  WHERE target_id = @target_id 
+                                  AND reason = @reason 
+                                  AND timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)", conn))
+                            {
+                                checkCmd.Parameters.AddWithValue("@target_id", targetId);
+                                checkCmd.Parameters.AddWithValue("@reason", reason);
+                                alertExists = Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
+                            }
+
+                            if (!alertExists)
+                            {
+                                Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Alert does not exist. Creating new alert.");
+                                using (var insertCmd = new MySqlCommand(
+                                    @"INSERT INTO alerts (reporter_id, target_id, reason, timestamp) 
+                                      VALUES (@reporter_id, @target_id, @reason, NOW())", conn))
+                                {
+                                    insertCmd.Parameters.AddWithValue("@reporter_id", reporterId);
+                                    insertCmd.Parameters.AddWithValue("@target_id", targetId);
+                                    insertCmd.Parameters.AddWithValue("@reason", reason);
+                                    insertCmd.ExecuteNonQuery();
+                                    Console.WriteLine("[AnalysisDal.CheckForBurstAlerts] Alert created successfully.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Alert already exists for target {targetId} with reason: {reason}. Skipping creation.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[AnalysisDal.CheckForBurstAlerts] Not enough reports for burst alert (required 3, found {reportCount}).");
                         }
                     }
                 }
@@ -140,6 +190,70 @@ namespace Malshinon.Dals
             finally
             {
                 dbConnection.CloseConnection();
+            }
+        }
+
+        private string GetTargetNameById(int targetId)
+        {
+            Console.WriteLine($"[AnalysisDal.GetTargetNameById] Fetching name for target ID: {targetId}");
+            string name = "";
+            string query = "SELECT first_name, last_name FROM people WHERE id = @id";
+            using (var newDbConnection = new DbConnectionMalshinon())
+            {
+                try
+                {
+                    newDbConnection.OpenConnection();
+                    using (var cmd = new MySqlCommand(query, newDbConnection.GetConn()))
+                    {
+                        cmd.Parameters.AddWithValue("@id", targetId);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                name = $"{reader.GetString("first_name")} {reader.GetString("last_name")}";
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AnalysisDal.GetTargetNameById] Error: {ex.Message}");
+                }
+                finally
+                {
+                    newDbConnection.CloseConnection();
+                }
+            }
+            return name;
+        }
+
+        private bool AlertExists(int targetId, string reason)
+        {
+            Console.WriteLine($"[AnalysisDal.AlertExists] Checking if alert exists for target ID: {targetId}, reason: {reason}");
+            string query = @"SELECT COUNT(*) FROM alerts WHERE target_id = @target_id AND reason = @reason AND timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
+            using (var newDbConnection = new DbConnectionMalshinon())
+            {
+                try
+                {
+                    newDbConnection.OpenConnection();
+                    using (var cmd = new MySqlCommand(query, newDbConnection.GetConn()))
+                    {
+                        cmd.Parameters.AddWithValue("@target_id", targetId);
+                        cmd.Parameters.AddWithValue("@reason", reason);
+                        int count = Convert.ToInt32(cmd.ExecuteScalar());
+                        Console.WriteLine($"[AnalysisDal.AlertExists] Found {count} existing alerts for target {targetId} with reason {reason} in last 15 minutes.");
+                        return count > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AnalysisDal.AlertExists] Error: {ex.Message}");
+                    return false;
+                }
+                finally
+                {
+                    newDbConnection.CloseConnection();
+                }
             }
         }
 

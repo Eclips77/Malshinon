@@ -149,14 +149,16 @@ namespace Malshinon.menus
             }
             else
             {
-                Console.WriteLine("\n{0,-20} {1,-20} {2,-30}", "Target", "Time Window", "Reason");
-                Console.WriteLine(new string('-', 70));
+                Console.WriteLine("\n{0,-10} {1,-15} {2,-15} {3,-40} {4,-20}", "ID", "Reporter ID", "Target ID", "Reason", "Timestamp");
+                Console.WriteLine(new string('-', 100));
                 foreach (var alert in alerts.OrderByDescending(a => a.Timestamp))
                 {
-                    Console.WriteLine("{0,-20} {1,-20} {2,-30}",
-                        alert.TargetName,
-                        $"{alert.StartTime:yyyy-MM-dd HH:mm} - {alert.EndTime:HH:mm}",
-                        alert.Reason);
+                    Console.WriteLine("{0,-10} {1,-15} {2,-15} {3,-40} {4,-20:yyyy-MM-dd HH:mm}",
+                        alert.Id,
+                        alert.ReporterId,
+                        alert.TargetId,
+                        alert.Reason,
+                        alert.Timestamp);
                 }
             }
             Console.WriteLine("\nPress any key to continue...");
@@ -234,14 +236,19 @@ namespace Malshinon.menus
                 }
                 else
                 {
-                    Console.WriteLine("\n{0,-20} {1,-20} {2,-30}", "Target", "Time Window", "Reason");
-                    Console.WriteLine(new string('-', 70));
+                    Console.WriteLine("\n{0,-10} {1,-15} {2,-15} {3,-40} {4,-20}", "ID", "Reporter ID", "Target ID", "Reason", "Timestamp");
+                    Console.WriteLine(new string('-', 100));
                     foreach (var alert in alerts.OrderByDescending(a => a.Timestamp))
                     {
-                        Console.WriteLine("{0,-20} {1,-20} {2,-30}",
-                            alert.TargetName,
-                            $"{alert.StartTime:yyyy-MM-dd HH:mm} - {alert.EndTime:HH:mm}",
-                            alert.Reason);
+                        // To display Target Name, we need to fetch it from PersonDal using TargetId
+                        string targetName = personDal.GetPersonById(alert.TargetId)?.FirstName + " " + personDal.GetPersonById(alert.TargetId)?.LastName;
+
+                        Console.WriteLine("{0,-10} {1,-15} {2,-15} {3,-40} {4,-20:yyyy-MM-dd HH:mm}",
+                            alert.Id,
+                            alert.ReporterId,
+                            alert.TargetId,
+                            alert.Reason,
+                            alert.Timestamp);
                     }
                 }
                 Console.WriteLine("\nPress any key to continue...");

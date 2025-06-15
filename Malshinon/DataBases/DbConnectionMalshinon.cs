@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Malshinon.DataBases
 {
-    internal class DbConnectionMalshinon
+    internal class DbConnectionMalshinon : IDisposable
     {
         private string connStr = "server=localhost;user=root;password=;database=malshinondb";
         private MySqlConnection _conn;
@@ -51,5 +51,9 @@ namespace Malshinon.DataBases
         }
         public MySqlConnection GetConn() => this._conn;
 
+        public void Dispose()
+        {
+            CloseConnection();
+        }
     }
 }

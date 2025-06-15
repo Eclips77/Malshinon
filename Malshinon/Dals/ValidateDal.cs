@@ -1,12 +1,6 @@
 ﻿using Malshinon.DataBases;
-using Malshinon.entityes;
 using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malshinon.Dals
 {
@@ -31,12 +25,12 @@ namespace Malshinon.Dals
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine($"[ValidateDal.ExistsInDatabase] SQL error: {ex.Message}");
+                Console.WriteLine($"ValidateDal.ExistsInDatabase SQL error: {ex.Message}");
                 throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ValidateDal.ExistsInDatabase] General error: {ex.Message}");
+                Console.WriteLine($"ValidateDal.ExistsInDatabase General error: {ex.Message}");
                 throw;
             }
             finally
@@ -63,7 +57,7 @@ namespace Malshinon.Dals
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"[ValidateDal.GetPersonType] Error reading row: {ex.Message}");
+                                Console.WriteLine($"ValidateDal.GetPersonType Error reading row: {ex.Message}");
                                 throw;
                             }
                         }

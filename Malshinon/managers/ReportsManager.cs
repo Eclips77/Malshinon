@@ -11,12 +11,15 @@ namespace Malshinon.Managers
     {
         public ReportDal _reportDal;
         private readonly PersonDal _personDal;
+        private readonly AnalysisDal _analysisDal;
         public ReportManager(
             ReportDal reportDal,
-            PersonDal personDal)
+            PersonDal personDal,
+            AnalysisDal analysisDal)
         {
             _reportDal = reportDal;
             _personDal = personDal;
+            _analysisDal = analysisDal;
         }
 
         public void AddReportInteractive()
@@ -38,6 +41,7 @@ namespace Malshinon.Managers
                 IntelReport report = new IntelReport { ReporterId = reporterId, TargetId = targetId, ReportTxt = reportText};
                 _reportDal.SetReportToDb(report);
                 Console.WriteLine("Report saved successfully.");
+                _analysisDal.CheckForBurstAlerts(reporterId, targetId);
             }
         }
         private int EnsureTargetExists(string firstName, string lastName)

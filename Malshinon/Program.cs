@@ -17,7 +17,7 @@ namespace Malshinon
     {
         static void Main(string[] args)
         {
-            ReportManager manager = new ReportManager(new ReportDal(), new PersonDal());
+            ReportManager manager = new ReportManager(new ReportDal(), new PersonDal(), new AnalysisDal());
             PersonManager pmanager = new PersonManager(new PersonDal());
             MainMenu.ShowMenu(manager, pmanager);
         }

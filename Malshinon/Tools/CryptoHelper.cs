@@ -7,7 +7,6 @@ namespace Malshinon.Tools
 {
     public static class CryptoHelper
     {
-        // For demonstration only! In production, store the key securely.
         private static readonly byte[] Key = Encoding.UTF8.GetBytes("1234567890123456"); // 16 bytes for AES-128
         private static readonly byte[] IV = Encoding.UTF8.GetBytes("6543210987654321"); // 16 bytes
 
